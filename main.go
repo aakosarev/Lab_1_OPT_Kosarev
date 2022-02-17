@@ -94,6 +94,59 @@ func IsCorrectBrackets(infix string) bool {
 	return count == 0
 }
 
+func IsFloat(fl string) bool {
+	flag := false
+	if fl[0] == '.' { // TODO: НЕ НАДО МБ
+		return false
+	}
+	for i := 0; i < len(fl); i++ {
+		if string(fl[i]) == "." && i != len(fl)-1 && !IsNumber(string(fl[i+1])) {
+			return false
+		}
+		if string(fl[i]) != "." && !IsNumber(string(fl[i])) && !IsOperation(string(fl[i])) && !IsBracket(string(fl[i])) {
+			return false
+		}
+		if IsOperation(string(fl[i])) {
+			flag = false
+		}
+		if string(fl[i]) == "." {
+			if flag {
+				return false
+			} else {
+				flag = true
+			}
+		}
+	}
+	return true
+}
+
+func IsCorr(infix string) bool {
+	begin := -1
+	end := -1
+	result := true
+	for i := 0; i < len(infix); i++ {
+		item := string(infix[i])
+		if IsNumber(item) && begin == -1 {
+			begin = i
+		}
+		if !IsNumber(item) && !IsBracket(item) && item != "." && begin != -1 && end == -1 { //TODO: хз
+			end = i
+		}
+		if i == len(infix)-1 {
+			end = i + 1
+		}
+		if end != -1 && begin != -1 {
+			result = IsFloat(infix[begin:end])
+			if result == false {
+				return result
+			}
+			begin = -1
+			end = -1
+		}
+	}
+	return result
+}
+
 func IsCorrect(infix string) bool {
 	if !IsCorrectBrackets(infix) {
 		return false
@@ -113,7 +166,7 @@ func IsCorrect(infix string) bool {
 			}
 		}
 		if infix[i] == ')' {
-			if !IsOperation(string(infix[i+1])) && !IsNumber(string(infix[i+1])) && infix[i+1] != '-' && infix[i+1] != ')' {
+			if !IsOperation(string(infix[i+1])) && infix[i+1] != '-' && infix[i+1] != ')' {
 				return false
 			}
 		}
@@ -230,7 +283,6 @@ func CalculateRPN(postfixTokens []string) (int, error) {
 		sta.Push(strconv.Itoa(value))
 	}
 	result, _ := strconv.Atoi(sta[0])
-
 	return result, nil
 }
 
@@ -264,10 +316,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		switch selection {
 		case "1":
 			var task string
 			var infix string
+
 			for flag := true; flag; {
 				ShowTaskMenu()
 				_, err := fmt.Scanf("%s\n", &task)
@@ -291,13 +345,15 @@ func main() {
 					fmt.Println("Введено некорректное значение! Введите еще раз:")
 				}
 			}
+
 			fmt.Printf("\nИнфиксная запись   :    %s\n", infix)
 			infix = strings.Join(strings.Fields(infix), "")
 			infix = strings.ToLower(infix)
+
 			m := make(map[string]string)
 			var valueList []string
+
 			if IsCorrect(infix) {
-				fmt.Println("КОРРЕКТНО!")
 				postfix := InfixToPostfix(infix)
 				fmt.Printf("Постфиксная запись :    %s\n", strings.Join(postfix, " "))
 				for _, token := range postfix {
