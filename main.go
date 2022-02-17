@@ -151,11 +151,14 @@ func IsCorrect(infix string) bool {
 	if !IsCorrectBrackets(infix) {
 		return false
 	}
+	if !IsCorr(infix) {
+		return false
+	}
 	if (IsOperation(string(infix[0])) && infix[0] != '-') || IsOperation(string(infix[len(infix)-1])) {
 		return false
 	}
 	for i := 0; i < len(infix); i++ {
-		if !IsLetter(string(infix[i])) && !IsOperation(string(infix[i])) && !IsNumber(string(infix[i])) && !IsBracket(string(infix[i])) {
+		if !IsLetter(string(infix[i])) && !IsOperation(string(infix[i])) && !IsNumber(string(infix[i])) && !IsBracket(string(infix[i])) && string(infix[i]) != "." {
 			return false
 		}
 	}
@@ -253,15 +256,15 @@ func InfixToPostfix(infix string) []string {
 	return postfixTokens
 }
 
-func CalculateRPN(postfixTokens []string) (int, error) {
+func CalculateRPN(postfixTokens []string) (float64, error) {
 	var sta Stack
-	var value int
+	var value float64
 	for _, token := range postfixTokens {
 		switch token {
 		case "+", "-", "*", "/":
-			right, _ := strconv.Atoi(sta.Top())
+			right, _ := strconv.ParseFloat(sta.Top(), 64)
 			sta.Pop()
-			left, _ := strconv.Atoi(sta.Top())
+			left, _ := strconv.ParseFloat(sta.Top(), 64)
 			sta.Pop()
 
 			switch token {
@@ -278,15 +281,15 @@ func CalculateRPN(postfixTokens []string) (int, error) {
 				value = left / right
 			}
 		default:
-			value, _ = strconv.Atoi(token)
+			value, _ = strconv.ParseFloat(token, 64)
 		}
-		sta.Push(strconv.Itoa(value))
+		sta.Push(fmt.Sprintf("%f", value))
 	}
-	result, _ := strconv.Atoi(sta[0])
+	result, _ := strconv.ParseFloat(sta[0], 64)
 	return result, nil
 }
 
-func Check(l, k, j, h, g, f, d, s, a, p, o, i, u, y, t int) int {
+func Check(l, k, j, h, g, f, d, s, a, p, o, i, u, y, t float64) float64 {
 	return (l - k - j - h*g + f/d/s) / (a*p*o + i + u - y + t)
 }
 
@@ -330,7 +333,7 @@ func main() {
 				}
 				switch task {
 				case "1":
-					infix = "(a+b*c))"
+					infix = "(l - k - j - h*g + f/d/s)/(a*p*o + i + u - y + t)"
 					flag = false
 				case "2":
 					fmt.Print("Введите выражение в инфиксной форме: ")
@@ -367,7 +370,7 @@ func main() {
 								if err != nil {
 									log.Fatal(err)
 								}
-								if _, err := strconv.Atoi(num); err != nil {
+								if _, err := strconv.ParseFloat(num, 64); err != nil {
 									fmt.Println("Некорректный ввод. Необходимо ввести число!")
 									fmt.Print(token, ": ")
 								} else {
@@ -385,11 +388,12 @@ func main() {
 				}
 				result, err := CalculateRPN(valueList)
 				if err != nil {
-					fmt.Println("Ошибка: ", err.Error())
+					log.Fatal(err)
 				}
 				fmt.Println("Результат: ", result)
-				fmt.Println("Результат средствами языка: ", Check(1, 1, 1, 1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
-
+				if task == "1" {
+					fmt.Printf("Результат средствами языка: %.6f\n", Check(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15))
+				}
 			} else {
 				fmt.Println("Некорректное выражение")
 			}
