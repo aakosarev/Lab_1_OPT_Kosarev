@@ -10,8 +10,6 @@ import (
 	"strings"
 )
 
-//var infix14 = "(l - k - j - h*g + f/d/s)/(a*p*o + i + u - y + t)"
-
 type Stack []string
 
 func (st *Stack) IsEmpty() bool {
@@ -82,11 +80,11 @@ func Priority(op string) int {
 
 func IsCorrectBrackets(infix string) bool {
 	count := 0
-	for char := range infix {
-		if char == '(' {
+	for i := 0; i < len(infix); i++ {
+		if string(infix[i]) == "(" {
 			count += 1
 		}
-		if char == ')' {
+		if string(infix[i]) == ")" {
 			count -= 1
 			if count < 0 {
 				return false
@@ -260,31 +258,26 @@ func ShowTaskMenu() {
 
 func main() {
 	var selection string
-
 	for selection != "2" {
 		ShowMenu()
 		_, err := fmt.Scanf("%s\n", &selection)
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		switch selection {
 		case "1":
 			var task string
 			var infix string
-
 			for flag := true; flag; {
 				ShowTaskMenu()
 				_, err := fmt.Scanf("%s\n", &task)
 				if err != nil {
 					log.Fatal(err)
 				}
-
 				switch task {
 				case "1":
-					infix = "(a+b*c)"
+					infix = "(a+b*c))"
 					flag = false
-
 				case "2":
 					fmt.Print("Введите выражение в инфиксной форме: ")
 					reader := bufio.NewReader(os.Stdin)
@@ -298,18 +291,15 @@ func main() {
 					fmt.Println("Введено некорректное значение! Введите еще раз:")
 				}
 			}
-
-			fmt.Printf("Инфиксная запись   :    %s\n", infix)
+			fmt.Printf("\nИнфиксная запись   :    %s\n", infix)
 			infix = strings.Join(strings.Fields(infix), "")
 			infix = strings.ToLower(infix)
-
 			m := make(map[string]string)
 			var valueList []string
-
 			if IsCorrect(infix) {
+				fmt.Println("КОРРЕКТНО!")
 				postfix := InfixToPostfix(infix)
 				fmt.Printf("Постфиксная запись :    %s\n", strings.Join(postfix, " "))
-
 				for _, token := range postfix {
 					if IsLetter(token) {
 						_, ok := m[token]
@@ -345,13 +335,11 @@ func main() {
 				fmt.Println("Результат средствами языка: ", Check(1, 1, 1, 1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
 
 			} else {
-				fmt.Println("Некорректный ввод")
+				fmt.Println("Некорректное выражение")
 			}
-
 		case "2":
 			fmt.Println("Выход из программы.")
 			return
-
 		default:
 			fmt.Println("Введено некорректное значение! Введите еще раз:")
 		}
