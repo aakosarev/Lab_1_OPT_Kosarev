@@ -1,16 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
 
 //var infix14 = "(l - k - j - h*g + f/d/s)/(a*p*o + i + u - y + t)"
-
-var infix14 = "(a+b*c)"
 
 type Stack []string
 
@@ -243,9 +243,17 @@ func Check(l, k, j, h, g, f, d, s, a, p, o, i, u, y, t int) int {
 func ShowMenu() {
 	fmt.Print("\n\n")
 	fmt.Println("Выберите нужный пункт:")
-	fmt.Println("1: Решить задачу c выражением из индивидуального варианта")
-	fmt.Println("2: Ввести своё выражение и решить задачу")
-	fmt.Println("3: Выйти из программы")
+	fmt.Println("1: Решить задачу")
+	fmt.Println("2: Выйти из программы")
+	fmt.Print("\n")
+	fmt.Print("Ввод:  ")
+}
+
+func ShowTaskMenu() {
+	fmt.Print("\n")
+	fmt.Println("Выберите задачу:")
+	fmt.Println("1) Решить задачу с выражением из индивидуального варианта")
+	fmt.Println("2) Решить задачу с выражением, вводимым пользователем")
 	fmt.Print("\n")
 	fmt.Print("Ввод:  ")
 }
@@ -253,33 +261,59 @@ func ShowMenu() {
 func main() {
 	var selection string
 
-	for selection != "3" {
-
+	for selection != "2" {
 		ShowMenu()
-
 		_, err := fmt.Scanf("%s\n", &selection)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		switch selection {
-
 		case "1":
-			fmt.Printf("Инфиксная запись   :    %s\n", infix14)
-			infix14 = strings.Join(strings.Fields(infix14), "")
-			infix14 = strings.ToLower(infix14)
+			var task string
+			var infix string
+
+			for flag := true; flag; {
+				ShowTaskMenu()
+				_, err := fmt.Scanf("%s\n", &task)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				switch task {
+				case "1":
+					infix = "(a+b*c)"
+					flag = false
+
+				case "2":
+					fmt.Print("Введите выражение в инфиксной форме: ")
+					reader := bufio.NewReader(os.Stdin)
+					infix, _ = reader.ReadString('\n')
+					if err != nil {
+						log.Fatal(err)
+					}
+					infix = strings.TrimSuffix(infix, "\n")
+					flag = false
+				default:
+					fmt.Println("Введено некорректное значение! Введите еще раз:")
+				}
+			}
+
+			fmt.Printf("Инфиксная запись   :    %s\n", infix)
+			infix = strings.Join(strings.Fields(infix), "")
+			infix = strings.ToLower(infix)
 
 			m := make(map[string]string)
 			var valueList []string
 
-			if IsCorrect(infix14) {
-				postfix := InfixToPostfix(infix14)
+			if IsCorrect(infix) {
+				postfix := InfixToPostfix(infix)
 				fmt.Printf("Постфиксная запись :    %s\n", strings.Join(postfix, " "))
 
 				for _, token := range postfix {
 					if IsLetter(token) {
 						_, ok := m[token]
-						if !ok { // тут бахать бесконечный цикл для правильного ввода
+						if !ok {
 							fmt.Print(token, ": ")
 							var num string
 							for {
@@ -315,46 +349,6 @@ func main() {
 			}
 
 		case "2":
-			fmt.Println("Введите выражение в инфиксной форме: ")
-			fmt.Printf("Инфиксная запись   :    %s\n", infix14)
-			infix14 = strings.Join(strings.Fields(infix14), "")
-			infix14 = strings.ToLower(infix14)
-
-			m := make(map[string]string)
-			var valueList []string
-
-			if IsCorrect(infix14) {
-				postfix := InfixToPostfix(infix14)
-				fmt.Printf("Постфиксная запись :    %s\n", strings.Join(postfix, " "))
-
-				for _, token := range postfix {
-					if IsLetter(token) {
-						_, ok := m[token]
-						if !ok { // тут бахать бесконечный цикл для правильного ввода
-							fmt.Print(token, ": ")
-							var num string
-							fmt.Scanf("%s\n", &num)
-							m[token] = num
-							valueList = append(valueList, m[token])
-						} else {
-							valueList = append(valueList, m[token])
-						}
-					} else {
-						valueList = append(valueList, token)
-					}
-				}
-				result, err := CalculateRPN(valueList)
-				if err != nil {
-					fmt.Println("Ошибка: ", err.Error())
-				}
-				fmt.Println("Результат: ", result)
-				fmt.Println("Результат средствами языка: ", Check(1, 1, 1, 1000, 1000, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
-
-			} else {
-				fmt.Println("Некорректный ввод")
-			}
-
-		case "3":
 			fmt.Println("Выход из программы.")
 			return
 
